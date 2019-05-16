@@ -1,6 +1,7 @@
 import { Component } from "@angular/core";
 import { FormBuilder, Validators } from "@angular/forms";
 import { forbiddenNameValidator } from './shared/user-name.validators';
+import { PasswordValidator } from './shared/password.validators';
 // import { FormGroup, FormControl } from "@angular/forms";
 
 @Component({
@@ -32,7 +33,7 @@ export class AppComponent {
 
 
   registrationForm=this.fb.group({
-    userName: ['', [Validators.required, Validators.minLength(3),forbiddenNameValidator]],
+    userName: ['', [Validators.required, Validators.minLength(3),forbiddenNameValidator(/password/)]],
     password: [''],
     confirmPassword: [''],
     address: this.fb.group({
@@ -40,7 +41,7 @@ export class AppComponent {
       state:[''],
       pinCode:['']
     })
-  })
+  },{validator: PasswordValidator});
   // registrationForm = new FormGroup({
   //   userName: new FormControl(''),
   //   password: new FormControl(''),
