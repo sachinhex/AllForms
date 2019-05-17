@@ -1,5 +1,5 @@
-import { Component } from "@angular/core";
-import { FormBuilder, Validators } from "@angular/forms";
+import { Component, OnInit } from "@angular/core";
+import { FormBuilder, Validators, FormGroup, FormArray } from "@angular/forms";
 import { forbiddenNameValidator } from './shared/user-name.validators';
 import { PasswordValidator } from './shared/password.validators';
 // import { FormGroup, FormControl } from "@angular/forms";
@@ -10,38 +10,56 @@ import { PasswordValidator } from './shared/password.validators';
   styleUrls: ["./app.component.css"]
 })
 
-export class AppComponent {
+export class AppComponent implements OnInit {
+  registrationForm: FormGroup;
+
   get userName(){
   return this.registrationForm.get('userName')
+
+}
+  get email(){
+  return this.registrationForm.get('email')
+}
+
+get alternateEmails(){
+  return this.registrationForm.get('alternateEmails') as FormArray;
+}
+
+addAlternateEmails(){
+  this.alternateEmails.push(this.fb.control(''));
 }
 
   constructor(private fb: FormBuilder){}
 
   ngOnInit(){
-    // this.registrationForm.setValue({
-    //   patchValue for few formcontrol field
-    //   userName: 'Sachin',
-    //   password:  'test',
-    //   confirmPassword: 'test',
-    //   address: {
-    //     city: 'City',
-    //     state: 'State',
-    //     pinCode: '250002'
-    //   }
-    // })
+    this.registrationForm=this.fb.group({
+      userName: ['', [Validators.required, Validators.minLength(3),forbiddenNameValidator(/password/)]],
+      email: [''],
+      subscribe: [false],
+      password: [''],
+      confirmPassword: [''],
+      address: this.fb.group({
+        city:[''],
+        state:[''],
+        pinCode:['']
+      }),
+      alternateEmails: this.fb.array([])
+    },{validator: PasswordValidator});
+
+    this.registrationForm.get('subscribe').valueChanges
+    .subscribe(checkedValue=>{
+      const email= this.registrationForm.get('email');
+      if(checkedValue){
+        email.setValidators(Validators.required);
+      }
+      else{
+        email.clearValidators();
+      }
+      email.updateValueAndValidity();
+    })
   }
 
 
-  registrationForm=this.fb.group({
-    userName: ['', [Validators.required, Validators.minLength(3),forbiddenNameValidator(/password/)]],
-    password: [''],
-    confirmPassword: [''],
-    address: this.fb.group({
-      city:[''],
-      state:[''],
-      pinCode:['']
-    })
-  },{validator: PasswordValidator});
   // registrationForm = new FormGroup({
   //   userName: new FormControl(''),
   //   password: new FormControl(''),
